@@ -68,15 +68,15 @@ def g(t, U):
     return np.array([dl0dt, dl1dt, dl2dt, dl3dt, dpdt, dqdt, drdt])
 
 #main part of the project
-I = np.array([[1., 1., 1.],
-              [4., 2., 5.],
-              [2., 8., 7.]], dtype=np.float64)
+I = np.array([[10., 0., 0.],
+              [0., 2., 0.],
+              [0., 0., 7.]], dtype=np.float64)
 omega0 = np.array([3., 2., 1.], dtype= np.float64) #in the basis associated with the body
 theta = np.pi / 6
 body = Solid_body(I, omega0, theta)
-#print(a.__get_main_I__())
-#print(a.__get_S_inv__() @ a.I @ a.__get_main_axes__())
-#print(a.__get_main_axes__())
+print(body.__get_main_I__())
+#print(body.__get_S_inv__() @ a.I @ a.__get_main_axes__())
+#print(body.__get_main_axes__())
 A = body.__get_main_I__()[0][0]
 B = body.__get_main_I__()[1][1]
 C = body.__get_main_I__()[2][2]
@@ -95,6 +95,11 @@ dpdt =(Mex[0] + (B - C) * q * r) / A
 dqdt =(Mex[1] + (C - A) * p * r) / B
 drdt =(Mex[2] + (A - B) * q * p) / C
 
-T = 10
+T = 100
 U0 = np.array([L0.l0, L0.l[0], L0.l[1], L0.l[2], body.omega[0], body.omega[1], body.omega[2]])
-solution = sp.integrate.solve_ivp(g, (0.0, T), y0=U0, t_eval=np.linspace(0.0, T, 101))
+solution = sp.integrate.solve_ivp(g, (0.0, T), y0=U0, t_eval=np.linspace(0.0, T, 10000))
+#print(solution.y)
+
+plt.plot(solution.t, solution.y[6,:], '-ro')
+plt.grid()
+plt.show()

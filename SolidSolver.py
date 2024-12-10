@@ -76,7 +76,7 @@ class Solid_body:
         for i in [[1, 0, 0], [0, 1, 0], [0, 0, 1]]:
             q0 = Quaternion(np.pi, i)
             q1 = q.__get_сonjugate_quaternion__()
-            q_res = q.__mult_on_quat__(q0).__mult_on_quat__(q1)
+            q_res = (q.__mult_on_quat__(q0)).__mult_on_quat__(q1)
             q_res.__normalization__()
             res.append([q_res.l[0], q_res.l[1], q_res.l[2]])
         return np.array(res)
@@ -107,8 +107,8 @@ def g(t, U):
 I = np.array([[5., 0., 0.],
               [0., 5., 0.],
               [0., 0., 1.]], dtype=np.float64)
-omega0 = np.array([1, 2, 3], dtype=np.float64)  # in the basis associated with the body
-R0 = np.array([1, 1, 1])  # the initial coordinates of the center of mass in the basis associated with the body
+omega0 = np.array([0, 0, 1], dtype=np.float64)  # in the basis associated with the body
+R0 = np.array([0, 0, 1])  # the initial coordinates of the center of mass in the basis associated with the body
 body = Solid_body(I, omega0, R0)
 print(body.__get_main_I__())
 print(body.__get_S_inv__() @ body.I @ body.__get_main_axes__())
@@ -120,7 +120,7 @@ p = body.omega[0]
 q = body.omega[1]
 r = body.omega[2]
 angle0 = np.pi
-axis0 = np.array([1, 1, 1])
+axis0 = np.array([0, 0, 1])
 L0 = Quaternion(angle0, axis0)
 L0.__normalization__()
 F = np.array([0, 0, 0])
@@ -131,7 +131,7 @@ dpdt = (Mex[0] + (B - C) * q * r) / A
 dqdt = (Mex[1] + (C - A) * p * r) / B
 drdt = (Mex[2] + (A - B) * q * p) / C
 
-T = 1000
+T = 100
 U0 = np.array([L0.l0, L0.l[0], L0.l[1], L0.l[2], body.omega[0], body.omega[1], body.omega[2]])
 solution = sp.integrate.solve_ivp(g, (0.0, T), y0=U0, t_eval=np.linspace(0.0, T, 10000))
 # print(solution.y)
@@ -149,13 +149,25 @@ Coordinates_cm = np.array([body.get_coordinates(quat) for quat in Quats])
 Coordinates_basis = np.array([body.get_basis(quat) for quat in Quats])
 
 plt.plot(solution.t, solution.y[6,:], '-ro')
+plt.title('ω3(t)')
+plt.xlabel('t, c')
+plt.ylabel('ω3, с⁻¹')
 plt.grid()
 plt.show()
 
-plt.plot(solution.t, Coordinates_cm[:,1], '-ro')
+plt.plot(solution.t, Coordinates_cm[:,2], '-ro')
+plt.title('Zc(t)')
+plt.xlabel('t, c')
+plt.ylabel('Zc')
 plt.grid()
 plt.show()
 
+plt.plot(Coordinates_cm[:,0], Coordinates_cm[:,1], '-ro')
+plt.title('Yc(Xc)')
+plt.xlabel('Xc')
+plt.ylabel('Yc')
+plt.grid()
+plt.show()
 
 fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(projection="3d")

@@ -107,12 +107,12 @@ def g(t, U):
 I = np.array([[5., 0., 0.],
               [0., 5., 0.],
               [0., 0., 1.]], dtype=np.float64)
-omega0 = np.array([0, 0, 1], dtype=np.float64)  # in the basis associated with the body
-R0 = np.array([0, 0, 1])  # the initial coordinates of the center of mass in the basis associated with the body
+omega0 = np.array([1, 1, 1], dtype=np.float64)  # in the basis associated with the body
+R0 = np.array([1, 1, 1])  # the initial coordinates of the center of mass in the basis associated with the body
 body = Solid_body(I, omega0, R0)
-print(body.__get_main_I__())
-print(body.__get_S_inv__() @ body.I @ body.__get_main_axes__())
-print(body.__get_main_axes__())
+#print(body.__get_main_I__())
+#print(body.__get_S_inv__() @ body.I @ body.__get_main_axes__())
+#print(body.__get_main_axes__())
 A = body.__get_main_I__()[0][0]
 B = body.__get_main_I__()[1][1]
 C = body.__get_main_I__()[2][2]
@@ -120,21 +120,21 @@ p = body.omega[0]
 q = body.omega[1]
 r = body.omega[2]
 angle0 = np.pi
-axis0 = np.array([0, 0, 1])
+axis0 = np.array([1, 1, 1])
 L0 = Quaternion(angle0, axis0)
 L0.__normalization__()
 F = np.array([0, 0, 0])
-Rc = np.array([1, 1, 1])
+Rc = np.array([0, 0, 1])
 Fex = External_force(F, Rc)
 Mex = Fex.__get_M__()
 dpdt = (Mex[0] + (B - C) * q * r) / A
 dqdt = (Mex[1] + (C - A) * p * r) / B
 drdt = (Mex[2] + (A - B) * q * p) / C
 
-T = 100
+T = 1000
 U0 = np.array([L0.l0, L0.l[0], L0.l[1], L0.l[2], body.omega[0], body.omega[1], body.omega[2]])
 solution = sp.integrate.solve_ivp(g, (0.0, T), y0=U0, t_eval=np.linspace(0.0, T, 10000))
-# print(solution.y)
+#print(solution.y)
 
 Quats = []
 
@@ -179,14 +179,18 @@ ax.quiver(0, 0, 0, 0, 0, 2, color="blue", alpha=0.6, lw=1)
 ax.quiver(0, 0, 0, 0, 2, 0, color="green", alpha=0.6, lw=1)
 ax.quiver(0, 0, 0, 2, 0, 0, color="red", alpha=0.6, lw=1)
 
-color = ['red', 'green', 'blue']
-lines = [ax.plot([], [], [], marker="", color=color[i])[0] for i in range(3)]
-data = Coordinates_basis
+color = ['red', 'green', 'blue', 'red', 'g']
+lines = [ax.plot([], [], [], marker="", color=color[i])[0] for i in range(5)]
+data = [[[i[0][0] * 2, i[0][1] * 2, i[0][2] * 2], i[1], i[2]]for i in Coordinates_basis]
+data_end = np.array([[i[0][0], i[0][1], i[0][2]] for i in data])
+data_cm = Coordinates_cm
 
 
 def animate(num, vecs, lines):
-    for line, vec in zip(lines, vecs[num]):
+    for line, vec in zip(lines[:3], vecs[num]):
         line.set_data_3d([0, vec[0]], [0, vec[1]], [0, vec[2]])
+    lines[3].set_data_3d(data_end[:num, :].T)
+    lines[4].set_data_3d(data_cm[:num, :].T)
     return lines
 
 
